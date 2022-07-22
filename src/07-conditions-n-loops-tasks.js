@@ -449,8 +449,21 @@ function getCommonDirectoryPath(pathes) {
  *                         [ 6 ]]
  *
  */
-function getMatrixProduct(/* m1, m2 */) {
-  throw new Error('Not implemented');
+function getMatrixProduct(m1, m2) {
+  const aNumRows = m1.length;
+  const aNumCols = m1[0].length;
+  const bNumCols = m2[0].length;
+  const m = new Array(aNumRows);
+  for (let i = 0; i < aNumRows; i += 1) {
+    m[i] = new Array(bNumCols);
+    for (let c = 0; c < bNumCols; c += 1) {
+      m[i][c] = 0;
+      for (let j = 0; j < aNumCols; j += 1) {
+        m[i][c] += m1[i][j] * m2[j][c];
+      }
+    }
+  }
+  return m;
 }
 
 
@@ -484,8 +497,24 @@ function getMatrixProduct(/* m1, m2 */) {
  *    [    ,   ,    ]]
  *
  */
-function evaluateTicTacToePosition(/* position */) {
-  throw new Error('Not implemented');
+function evaluateTicTacToePosition(position) {
+  for (let i = 0; i < 3; i += 1) {
+    if (position[0][i] === position[1][i] && position[1][i] === position[2][i]
+    ) {
+      if (position[0][i]) return position[0][i];
+    }
+  }
+  for (let j = 0; j < 3; j += 1) {
+    if (position[j][0] === position[j][1] && position[j][1] === position[j][2]
+    ) {
+      if (position[j][0]) return position[j][0];
+    }
+  }
+  if ((position[0][0] === position[1][1] && position[1][1] === position[2][2])
+  || (position[0][2] === position[1][1] && position[1][1] === position[2][0])) {
+    if (position[1][1]) return position[1][1];
+  }
+  return undefined;
 }
 
 
