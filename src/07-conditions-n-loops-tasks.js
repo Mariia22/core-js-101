@@ -189,8 +189,13 @@ function isInsideCircle(circle, point) {
  *   'abracadabra'  => 'c'
  *   'entente' => null
  */
-function findFirstSingleChar(/* str */) {
-  throw new Error('Not implemented');
+function findFirstSingleChar(str) {
+  for (let i = 0; i < str.length; i += 1) {
+    if (str.indexOf(str[i]) === i && str.indexOf(str[i], i + 1) === -1) {
+      return str[i];
+    }
+  }
+  return null;
 }
 
 
@@ -216,8 +221,25 @@ function findFirstSingleChar(/* str */) {
  *   5, 3, true, true   => '[3, 5]'
  *
  */
-function getIntervalString(/* a, b, isStartIncluded, isEndIncluded */) {
-  throw new Error('Not implemented');
+function getIntervalString(a, b, isStartIncluded, isEndIncluded) {
+  let result = '';
+  if (isStartIncluded) {
+    result += '[';
+  } else {
+    result += '(';
+  }
+  if (a < b) {
+    result += `${a}, ${b}`;
+  } else {
+    result += `${b}, ${a}`;
+  }
+  if (isEndIncluded) {
+    result += ']';
+  } else {
+    result += ')';
+  }
+
+  return result;
 }
 
 
@@ -233,8 +255,8 @@ function getIntervalString(/* a, b, isStartIncluded, isEndIncluded */) {
  * 'rotator' => 'rotator'
  * 'noon' => 'noon'
  */
-function reverseString(/* str */) {
-  throw new Error('Not implemented');
+function reverseString(str) {
+  return str.toString().split('').reverse().join('');
 }
 
 
@@ -250,8 +272,8 @@ function reverseString(/* str */) {
  *   87354 => 45378
  *   34143 => 34143
  */
-function reverseInteger(/* num */) {
-  throw new Error('Not implemented');
+function reverseInteger(num) {
+  return Number(num.toString().split('').reverse().join(''));
 }
 
 
@@ -275,8 +297,21 @@ function reverseInteger(/* num */) {
  *   5436468789016589 => false
  *   4916123456789012 => false
  */
-function isCreditCardNumber(/* ccn */) {
-  throw new Error('Not implemented');
+function isCreditCardNumber(ccn) {
+  let sum = 0;
+  let doubleNum = false;
+  const ccnString = ccn.toString();
+  for (let i = ccnString.length - 1; i >= 0; i -= 1) {
+    let digit = +ccnString[i];
+    if (doubleNum) {
+      digit *= 2;
+      if (digit > 9) digit -= 9;
+    }
+    sum += digit;
+    doubleNum = !doubleNum;
+  }
+
+  return sum % 10 === 0;
 }
 
 /**
@@ -293,8 +328,12 @@ function isCreditCardNumber(/* ccn */) {
  *   10000 ( 1+0+0+0+0 = 1 ) => 1
  *   165536 (1+6+5+5+3+6 = 26,  2+6 = 8) => 8
  */
-function getDigitalRoot(/* num */) {
-  throw new Error('Not implemented');
+function getDigitalRoot(num) {
+  let number = num.toString().split('');
+  while (number.length > 1) {
+    number = number.reduce((acc, item) => acc + Number(item), 0).toString().split('');
+  }
+  return Number(number.join(''));
 }
 
 
@@ -319,8 +358,26 @@ function getDigitalRoot(/* num */) {
  *   '{)' = false
  *   '{[(<{[]}>)]}' = true
  */
-function isBracketsBalanced(/* str */) {
-  throw new Error('Not implemented');
+function isBracketsBalanced(str) {
+  const stack = {};
+  let size = 0;
+  const beginners = ['(', '[', '{', '<'];
+  const enders = [')', ']', '}', '>'];
+  for (let i = 0; i < str.length; i += 1) {
+    if (beginners.indexOf(str[i]) !== -1) {
+      stack[size] = str[i];
+      size += 1;
+    } else if (enders.indexOf(str[i]) !== -1) {
+      if (size === 0) { return false; }
+      const index = enders.indexOf(str[i]);
+      if (stack[size - 1] === beginners[index]) {
+        size -= 1;
+      } else {
+        return false;
+      }
+    }
+  }
+  return size === 0;
 }
 
 
@@ -344,8 +401,8 @@ function isBracketsBalanced(/* str */) {
  *    365, 4  => '11231'
  *    365, 10 => '365'
  */
-function toNaryString(/* num, n */) {
-  throw new Error('Not implemented');
+function toNaryString(num, n) {
+  return num.toString(n);
 }
 
 
@@ -361,8 +418,16 @@ function toNaryString(/* num, n */) {
  *   ['/web/assets/style.css', '/.bin/mocha',  '/read.me'] => '/'
  *   ['/web/favicon.ico', '/web-scripts/dump', '/verbalizer/logs'] => '/'
  */
-function getCommonDirectoryPath(/* pathes */) {
-  throw new Error('Not implemented');
+function getCommonDirectoryPath(pathes) {
+  let result = '';
+  const length = Math.max(...pathes.map((item) => item.length));
+  let array;
+  for (let i = 0; i < length; i += 1) {
+    array = pathes.map((item) => item[i]);
+    if (array.every((item) => item === pathes[0][i])) result += pathes[0][i];
+    else break;
+  }
+  return result.slice(0, result.lastIndexOf('/') + 1);
 }
 
 
