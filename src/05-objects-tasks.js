@@ -119,93 +119,110 @@ function fromJSON(proto, json) {
 class CssBuilder {
   constructor() {
     this.names = ['element', 'id', 'class', 'attr', 'pseudoClass', 'pseudoElement'];
-    this.selectors = new Map();
-    this.combines = [];
+    this.selectors = {};
+    this.complex = [];
+    this.combinationString = '';
+    this.repeatError = 'Element, id and pseudo-element should not occur more then one time inside the selector';
+    this.positionError = 'Selector parts should be arranged in the following order: element, id, class, attribute, pseudo-class, pseudo-element';
+  }
+
+  checkValue(string) {
+    if (Object.prototype.hasOwnProperty.call(this.selectors, string)) {
+      throw new Error(this.repeatError);
+    }
+  }
+
+  checkPosition() {
+    const keys = Object.keys(this.selectors);
+    const currentPosition = this.names.filter((selector) => keys.includes(selector));
+    if (keys.some((selector, index) => index > currentPosition.indexOf(selector))) {
+      throw new Error(this.positionError);
+    }
+  }
+
+  isSelector(string) {
+    if (!Object.prototype.hasOwnProperty.call(this.selectors, string)) {
+      this.selectors[string] = [];
+    }
   }
 
   element(value) {
-    this.validSelector('element');
-    this.selectors.set('element', value);
-    this.validPosition();
+    this.checkValue('element');
+    this.selectors = { ...this.selectors, element: value };
+    this.checkPosition();
     return this;
   }
 
   id(value) {
-    this.validSelector('id');
-    this.selectors.set('id', `#${value}`);
-    this.validPosition();
+    this.checkValue('id');
+    this.selectors = { ...this.selectors, id: `#${value}` };
+    this.checkPosition();
     return this;
   }
 
   class(value) {
     this.isSelector('class');
-    this.selectors.get('class').push(`.${value}`);
-    this.validPosition();
+    this.selectors.class.push(`.${value}`);
+    this.checkPosition();
     return this;
   }
 
   attr(value) {
     this.isSelector('attr');
-    this.selectors.get('attr').push(`[${value}]`);
-    this.validPosition();
+    this.selectors.attr.push(`[${value}]`);
+    this.checkPosition();
     return this;
   }
 
   pseudoClass(value) {
     this.isSelector('pseudoClass');
-    this.selectors.get('pseudoClass').push(`:${value}`);
-    this.validPosition();
+    this.selectors.pseudoClass.push(`:${value}`);
+    this.checkPosition();
     return this;
   }
 
   pseudoElement(value) {
-    this.validSelector('pseudoElement');
-    this.selectors.set('pseudoElement', `::${value}`);
-    this.validPosition();
+    this.checkValue('pseudoElement');
+    this.selectors = { ...this.selectors, pseudoElement: `::${value}` };
+    this.checkPosition();
     return this;
   }
 
-  combine(selector1, combinator, selector2) {
-    this.combines.push(
-      ...selector1.selectors.values(),
-      ` ${combinator} `,
-      ...selector2.selectors.values(),
-      ...selector2.combines.values(),
-    );
+  combine(item1, combination, item2) {
+    this.complex.push(`${item1.stringify()} ${combination} ${item2.stringify()}`);
     return this;
   }
 
   stringify() {
-    if (this.combines.length > 0) return this.combines.flat().join('');
-    return [...this.selectors.values()].flat().join('');
-  }
-
-  isSelector(selector) {
-    if (!this.selectors.has(selector)) this.selectors.set(selector, []);
-  }
-
-  validSelector(selector) {
-    if (this.selectors.has(selector)) { throw new Error('Element, id and pseudo-element should not occur more then one time inside the selector'); }
-  }
-
-  validPosition() {
-    const selecKeys = [...this.selectors.keys()];
-    const currentPos = this.names.filter((selec) => selecKeys.includes(selec));
-    const correctPos = selecKeys.some((selec, i) => i > currentPos.indexOf(selec));
-    if (correctPos) { throw new Error('Selector parts should be arranged in the following order: element, id, class, attribute, pseudo-class, pseudo-element'); }
+    if (this.complex.length > 0) {
+      return this.complex.flat().join('');
+    }
+    return Object.values(this.selectors).flat().join('');
   }
 }
-
 const cssSelectorBuilder = {
-  element: (value) => new CssBuilder().element(value),
-  id: (value) => new CssBuilder().id(value),
-  class: (value) => new CssBuilder().class(value),
-  attr: (value) => new CssBuilder().attr(value),
-  pseudoClass: (value) => new CssBuilder().pseudoClass(value),
-  pseudoElement: (value) => new CssBuilder().pseudoElement(value),
-  combine: (sel1, combinator, sel2) => new CssBuilder().combine(sel1, combinator, sel2),
+  element(value) {
+    return new CssBuilder().element(value);
+  },
+  id(value) {
+    return new CssBuilder().id(value);
+  },
+  class(value) {
+    return new CssBuilder().class(value);
+  },
+  attr(value) {
+    return new CssBuilder().attr(value);
+  },
+  pseudoClass(value) {
+    return new CssBuilder().pseudoClass(value);
+  },
+  pseudoElement(value) {
+    return new CssBuilder().pseudoElement(value);
+  },
+  combine(item1, combination, item2) {
+    return new CssBuilder().combine(item1, combination, item2);
+  },
 };
-
 
 module.exports = {
   Rectangle,
